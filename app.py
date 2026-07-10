@@ -6,17 +6,35 @@ import sys
 # Ensure utils directory is in path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from utils.loader import load_raw_data, get_long_comparison_df, get_patient_wide_comparison, get_genes, get_patients
+from utils.loader import (
+    load_raw_data,
+    get_long_comparison_df,
+    get_patient_wide_comparison,
+    get_genes,
+    get_patients,
+)
 
 # Set page config at the very beginning
 st.set_page_config(
     page_title="Genomic CNV Concordance Portal",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
+# Add general metadata in sidebar
+# st.sidebar.markdown(
+#     """
+# <div style="text-align: center; padding: 10px 0;">
+#     <h2 style="margin: 0; color: #1e3c72; font-size: 1.4rem;">CNV Explorer</h2>
+#     <p style="margin: 0; font-size: 0.85rem; color: #7f8c8d;">Version 1.0 (Illumina | Batch 6)</p>
+# </div>
+# <hr style="margin: 10px 0; border: none; border-top: 1px solid #e1e8ed;" />
+# """,
+#     unsafe_allow_html=True,
+# )
 
 # Custom Styling (Dark-themed glassmorphism elements, custom fonts, etc.)
-st.markdown("""
+st.markdown(
+    """
 <style>
     /* Global Styles */
     .stApp {
@@ -77,7 +95,9 @@ st.markdown("""
     .badge-fp { background-color: #fdebd0; color: #d35400; border: 1px solid #f5cba7; font-weight: bold; padding: 2px 6px; border-radius: 4px; }
     .badge-fn { background-color: #fadbd8; color: #78281f; border: 1px solid #f1948a; font-weight: bold; padding: 2px 6px; border-radius: 4px; }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # Initialize Session State
 if "raw_df" not in st.session_state:
@@ -101,7 +121,7 @@ if "active_filters" not in st.session_state:
         "genes": st.session_state.get("genes", []),
         "patients": st.session_state.get("patients", []),
         "concordance": "All",
-        "gene_deletions": {}
+        "gene_deletions": {},
     }
 
 # Multipage Navigation Setup
@@ -119,17 +139,9 @@ pages = {
     "Explorer": [
         st.Page("pages/filters.py", title="Deletion Pattern Explorer", icon="🔍"),
         st.Page("pages/export.py", title="Export & Reporting", icon="💾"),
-    ]
+    ],
 }
 
-# Add general metadata in sidebar
-st.sidebar.markdown("""
-<div style="text-align: center; padding: 10px 0;">
-    <h2 style="margin: 0; color: #1e3c72; font-size: 1.4rem;">CNV Explorer</h2>
-    <p style="margin: 0; font-size: 0.85rem; color: #7f8c8d;">Version 1.0 (Illumina | Batch 6)</p>
-</div>
-<hr style="margin: 10px 0; border: none; border-top: 1px solid #e1e8ed;" />
-""", unsafe_allow_html=True)
 
 # Navigation execution
 if hasattr(st, "navigation"):
@@ -138,9 +150,16 @@ if hasattr(st, "navigation"):
 else:
     # Classic sidebar fallback for older Streamlit versions
     st.sidebar.title("Navigation")
-    page_names = ["Overview Dashboard", "Patient Case Browser", "Interactive Charts", "Validation Statistics", "Deletion Pattern Explorer", "Export & Reporting"]
+    page_names = [
+        "Overview Dashboard",
+        "Patient Case Browser",
+        "Interactive Charts",
+        "Validation Statistics",
+        "Deletion Pattern Explorer",
+        "Export & Reporting",
+    ]
     selected_page = st.sidebar.radio("Go to", page_names)
-    
+
     # Fallback import & run
     if selected_page == "Overview Dashboard":
         import pages.overview as page_module
