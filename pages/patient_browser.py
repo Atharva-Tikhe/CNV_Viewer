@@ -31,7 +31,7 @@ def run():
     # Header
     st.markdown("""
     <div class="portal-header">
-        <h1>👤 Patient Case Browser</h1>
+        <h1>Patient Case Browser</h1>
         <p>Explore gene-by-gene results for individual patients, document review comments, and log clinical validations.</p>
     </div>
     """, unsafe_allow_html=True)
@@ -248,6 +248,24 @@ def run():
                 * **Comment:**
                 > {note_detail['comment'] or '*No comment entered.*'}
                 """)
+
+            # genomic_regions = st.columns([1])
+
+            # with genomic_regions:
+        st.markdown(f"### Genomic {selected_rid}")
+
+        check_results = os.path.isdir(f'data/{selected_rid}')
+
+        if check_results:
+            img_files = [file for file in os.listdir(f'data/{selected_rid}') if file.endswith('.png') and file.split('.')[0] in genes]
+
+
+            for file in img_files:
+                st.markdown(f'### {file.split(".")[0]}')
+                st.image(f'data/{selected_rid}/{file}')
+
+        # st.markdown(f"- {selected_rid} {'has' if check_results else 'has no'} genomic plots ")
+
                 
 # Run if page file is executed directly (classic fallback)
 if __name__ == "__main__":
