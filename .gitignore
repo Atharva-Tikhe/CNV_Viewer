@@ -2,5 +2,6 @@ data/
 .agents/
 .claude/
 .venv/
+db/db.py
 __pycache__/
 */__pycache__/

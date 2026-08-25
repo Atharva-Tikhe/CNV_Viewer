@@ -2,9 +2,10 @@ import streamlit as st
 import pandas as pd
 import os
 import sys
-
-# Ensure utils directory is in path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from db.service import Service
+from db.db import SessionLocal
+import asyncio
+from compare_genewise import matches
 
 from utils.loader import (
     load_raw_data,
@@ -13,6 +14,38 @@ from utils.loader import (
     get_genes,
     get_patients,
 )
+
+dataset = st.query_params.get("cohort_id")
+DIAGNOSTIC_OUT = "/home/atharva/opt/diagnoses/CIMS_full.csv"
+
+
+async def get_cohort_info(dataset):
+    async with SessionLocal() as db:
+        serv = Service(db)
+        cohort = await serv.get_cohorts(dataset)
+        return cohort
+
+
+if dataset:
+    st.write(f"Using cohort ID: {dataset}")
+    cohort = asyncio.run(get_cohort_info(dataset))
+
+    st.session_state["cohort"] = cohort[0]
+
+    if "cohort" in st.session_state:
+        if st.session_state["cohort"].status == "COMPLETED":
+            matches(
+                DIAGNOSTIC_OUT,
+                f"/home/atharva/dev/executions/{st.session_state["cohort"].output_dir}/",
+                f"/home/atharva/dev/executions/{st.session_state["cohort"].output_dir}/cnv_data.csv",
+            )
+            st.session_state["dataset"] = (
+                f"/home/atharva/dev/executions/{st.session_state["cohort"].output_dir}/cnv_data.csv"
+            )
+
+
+# Ensure utils directory is in path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Set page config at the very beginning
 st.set_page_config(
@@ -99,15 +132,31 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# executions = os.listdir('/home/atharva/dev/executions/')
+
+# st.sidebar.header("Datasets (from pipeline execution)")
+# selected_dataset = st.sidebar.radio("", executions)
+
+# if f"{selected_dataset}.csv" in os.listdir('/home/atharva/opt/diagnoses/'):
+#     print(selected_dataset)
+#     st.session_state["dataset"] = "/home/atharva/opt/diagnoses/{selected_dataset}.csv"
+
 # Initialize Session State
 if "raw_df" not in st.session_state:
     try:
-        raw_df = load_raw_data()
-        st.session_state["raw_df"] = raw_df
-        st.session_state["long_df"] = get_long_comparison_df(raw_df)
-        st.session_state["wide_df"] = get_patient_wide_comparison(raw_df)
-        st.session_state["genes"] = get_genes(raw_df)
-        st.session_state["patients"] = get_patients(raw_df)
+        if "dataset" in st.session_state:
+            raw_df = load_raw_data(st.session_state["dataset"])
+            st.session_state["raw_df"] = raw_df
+            st.session_state["long_df"] = get_long_comparison_df(raw_df)
+            st.session_state["wide_df"] = get_patient_wide_comparison(raw_df)
+            st.session_state["genes"] = get_genes(raw_df)
+            st.session_state["patients"] = get_patients(raw_df)
+        else:
+            # raw_df = load_raw_data()
+            st.write(
+                f"No dataset for the cohort: {input_cohort.cohort_id} at .../executions/{input_cohort.output_dir}"
+            )
+
     except Exception as e:
         st.error(f"Error loading data: {e}")
 
