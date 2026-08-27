@@ -307,6 +307,18 @@ def run():
         #
         # genomic_regions = st.columns([1])
 
+        check_results = False
+        results = ""
+        for sample_dir in os.listdir(
+            f"/home/atharva/dev/executions/{st.session_state['cohort'].output_dir}/"
+        ):
+            if sample_dir.endswith(str(selected_rid)):
+                print(sample_dir)
+                check_results = os.path.isdir(
+                    f"/home/atharva/dev/executions/{st.session_state['cohort'].output_dir}/{sample_dir}/"
+                )
+                results = f"/home/atharva/dev/executions/{st.session_state['cohort'].output_dir}/{sample_dir}/"
+
         with c_right:
             st.subheader("UKALL CNA Classifier")
             st.markdown(
@@ -314,7 +326,7 @@ def run():
                 unsafe_allow_html=True,
             )
             result = ""
-            with open(f"data/{selected_rid}/classifier_result.txt", "r") as f:
+            with open(f"{results}/report/classifier_result.txt", "r") as f:
                 result = f.readlines()[0].strip()
 
             status_color = "#ee5253" if result == "Poor risk" else "#10ac84"
@@ -332,19 +344,21 @@ def run():
             # with genomic_regions:
         st.markdown(f"### Genomic {selected_rid}")
 
-        check_results = os.path.isdir(f"data/{selected_rid}")
-
         if check_results:
             img_files = [
                 file
-                for file in os.listdir(f"data/{selected_rid}")
+                for file in os.listdir(f"{results}/report/")
                 if file.endswith(".png") and file.split(".")[0] in genes
             ]
 
+            print(img_files)
+
             for file in img_files:
                 st.markdown(f'### {file.split(".")[0]}')
-                st.markdown(f"DEBUG: data/{selected_rid}/{file}")
-                st.image(f"data/{selected_rid}/{file}")
+                st.markdown(f"Imag`e from -- {results}")
+
+                st.image(f"{results}/report/{file}")
+                # st.image(f"data/{selected_rid}/{file}")
 
         # st.markdown(f"- {selected_rid} {'has' if check_results else 'has no'} genomic plots ")
 

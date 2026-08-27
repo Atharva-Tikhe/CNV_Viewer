@@ -1,7 +1,9 @@
 data/
+*.csv
 .agents/
 .claude/
 .venv/
+.vscode/
 db/db.py
 __pycache__/
 */__pycache__/
