@@ -26,6 +26,18 @@ pipeline_output = [
     "PAR1",
 ]
 
+PAR_genes = ["SHOX", "CRLF2", "IL3RA", "ASMTL", "P2RY8"]
+
+# update panel, pipeline genes from original panel
+df = pd.read_csv("/home/atharva/opt/panel_genes.bed", sep="\t")
+
+panel_genes = list(df["gene"])
+
+for gene in panel_genes:
+    if gene not in panel and gene not in PAR_genes:
+        panel.append(gene)
+        pipeline_output.append(gene)
+
 
 def get_cn_results(regid, df):
     ukall = [regid]
@@ -60,9 +72,12 @@ def get_pipeline_results(sample, executions_path):
         pipeline_res = {}
 
         for gene in pipeline_output:
-            pipeline_res[gene] = (
-                "D" if pipeline_results.loc[:, gene].values[0] == "Yes" else "N"
-            )
+            if gene in list(pipeline_results.columns):
+                pipeline_res[gene] = (
+                    "D" if pipeline_results.loc[:, gene].values[0] == "Yes" else "N"
+                )
+            else:
+                pipeline_res[gene] = "N"
 
         # The pipeline treats CDKN2A/B separately but the reports mention both together, so we merge same results
         if pipeline_res["CDKN2A"] == pipeline_res["CDKN2B"]:
